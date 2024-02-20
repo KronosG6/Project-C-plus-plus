@@ -28,8 +28,6 @@ void imprimirMatriz(const std::vector<std::vector<int>>& matriz) {
 
 // Función para multiplicar dos matrices de manera secuencial
 std::vector<std::vector<int>> multiplicarMatricesSecuencial(const std::vector<std::vector<int>>& matrizA, const std::vector<std::vector<int>>& matrizB) {
-    auto start = std::chrono::steady_clock::now(); //Iniciar el contador de tiempo
-    
     int filasA = matrizA.size();
     int columnasA = matrizA[0].size();
     int columnasB = matrizB[0].size();
@@ -42,10 +40,7 @@ std::vector<std::vector<int>> multiplicarMatricesSecuencial(const std::vector<st
             }
         }
     }
-    auto end = std::chrono::steady_clock::now(); // Finalizar contador de tiempo
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << "Tiempo de multiplicación de matrices secuencial: " << elapsed_seconds.count() << " segundos" << std::endl;
-
+    
     return resultado;
 }
 
@@ -66,8 +61,6 @@ void multiplicarPorcionMatrices(const std::vector<std::vector<int>>& matrizA, co
 
 // Función para multiplicar dos matrices utilizando hilos
 std::vector<std::vector<int>> multiplicarMatricesParalela(const std::vector<std::vector<int>>& matrizA, const std::vector<std::vector<int>>& matrizB) {
-    auto start = std::chrono::steady_clock::now(); // Iniciar contador de tiempo
-    
     int filasA = matrizA.size();
     int columnasB = matrizB[0].size();
     std::vector<std::vector<int>> resultado(filasA, std::vector<int>(columnasB, 0));
@@ -87,10 +80,6 @@ std::vector<std::vector<int>> multiplicarMatricesParalela(const std::vector<std:
         hilo.join();
     }
     
-    auto end = std::chrono::steady_clock::now(); // Finalizar contador de tiempo
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << "Tiempo de multiplicación paralela: " << elapsed_seconds.count() << " segundos" << std::endl;
-    
     return resultado;
 }
 
@@ -102,6 +91,11 @@ int main() {
     int filasB = columnasA;
     int columnasB = 1000; 
 
+    if (columnasA != filasB) {
+        std::cout << "Para realizar una multiplicación de matrices, el nro de columnas de la matriz A debe ser igual al nro de columnas de la matriz B" << std::endl;
+        return 0;
+    }
+
     // Generar las matrices aleatorias
     auto matrizA = generarMatrizAleatoria(filasA, columnasA);
     auto matrizB = generarMatrizAleatoria(filasB, columnasB);
@@ -110,26 +104,35 @@ int main() {
     std::cout << "Matriz A:" << std::endl;
     imprimirMatriz(matrizA);
     
-    std::cout << "Matriz B:" << std::endl;
+    std::cout << "\nMatriz B:" << std::endl;
     imprimirMatriz(matrizB);
     */
 
-
     // Multiplicar las matrices de forma secuencial
-    std::cout << "\nMultiplicación secuencial:" << std::endl;
+    std::cout << "\nRealizando la multiplicación de forma secuencial..." << std::endl;
+    auto start = std::chrono::steady_clock::now(); //Iniciar el contador de tiempo para secuencial
     auto resultado_secuencial = multiplicarMatricesSecuencial(matrizA, matrizB);
-    /*
-    std::cout << "Resultado de la multiplicación:" << std::endl;
-    imprimirMatriz(resultado_secuencial);
-    */
+    auto end = std::chrono::steady_clock::now(); // Finalizar contador de tiempo para secuencial
+    std::chrono::duration<double> elapsed_seconds = end - start;
+
+    //std::cout << "\nResultado de la multiplicación secuencial:" << std::endl;
+    //imprimirMatriz(resultado_secuencial);
 
     // Multiplicación paralela
-    std::cout << "\nMultiplicación paralela:" << std::endl;
+    std::cout << "\nRealizando la multiplicación de forma paralela..." << std::endl;
+    auto start2 = std::chrono::steady_clock::now(); // Iniciar contador de tiempo para paralela
     auto resultado_paralelo = multiplicarMatricesParalela(matrizA, matrizB);
-    /*
-    std::cout << "Resultado de la multiplicación:" << std::endl;
-    imprimirMatriz(resultado_paralelo);
-    */
+    auto end2 = std::chrono::steady_clock::now(); // Finalizar contador de tiempo para paralela
+    std::chrono::duration<double> elapsed_seconds2 = end2 - start2;
+
+    //std::cout << "\nResultado de la multiplicación paralela:" << std::endl;
+    //imprimirMatriz(resultado_paralelo);
+
+    std::cout << "\nResultados:" << std::endl;
+    std::cout << "Tiempo de multiplicación de matrices secuencial: " << elapsed_seconds.count() << " segundos" << std::endl;
+    std::cout << "  Tiempo de multiplicación de matrices paralela: " << elapsed_seconds2.count() << " segundos" << std::endl;
+    std::cout << "\nRendimiento: "<< elapsed_seconds/elapsed_seconds2 << std::endl;
+    std::cout << " Eficiencia: "<< 100*(elapsed_seconds/elapsed_seconds2)/std::thread::hardware_concurrency()  << "%" << std::endl;
 
     return 0;
 }
